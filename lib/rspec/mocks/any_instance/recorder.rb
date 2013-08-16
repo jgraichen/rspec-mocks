@@ -32,7 +32,7 @@ module RSpec
             end
           else
             observe!(method_name_or_method_map)
-            message_chains.add(method_name_or_method_map, StubChain.new(method_name_or_method_map, &block))
+            message_chains.add(method_name_or_method_map, StubChain.new(self, method_name_or_method_map, &block))
           end
         end
 
@@ -44,7 +44,7 @@ module RSpec
         def stub_chain(*method_names_and_optional_return_values, &block)
           normalize_chain(*method_names_and_optional_return_values) do |method_name, args|
             observe!(method_name)
-            message_chains.add(method_name, StubChainChain.new(*args, &block))
+            message_chains.add(method_name, StubChainChain.new(self, *args, &block))
           end
         end
 
@@ -56,7 +56,7 @@ module RSpec
         def should_receive(method_name, &block)
           @expectation_set = true
           observe!(method_name)
-          message_chains.add(method_name, PositiveExpectationChain.new(method_name, &block))
+          message_chains.add(method_name, PositiveExpectationChain.new(self, method_name, &block))
         end
 
         def should_not_receive(method_name, &block)
