@@ -74,8 +74,9 @@ module RSpec
           end
           message_chains.remove_stub_chains_for!(method_name)
           for proxy in ::RSpec::Mocks.proxies_of(@klass)
-            proxy.remove_stub(method_name)
+            stubs[method_name].each { |stub| proxy.remove_single_stub(method_name, stub) }
           end
+          stubs[method_name].clear
           stop_observing!(method_name) unless message_chains.has_expectation?(method_name)
         end
 

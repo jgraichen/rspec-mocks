@@ -280,11 +280,19 @@ module RSpec
         end
 
         it "removes stubs even if they have already been invoked" do
-          klass.any_instance.stub(:existing_method)
+          klass.any_instance.stub(:existing_method).and_return(:any_instance_value)
           obj = klass.new
           obj.existing_method
           klass.any_instance.unstub(:existing_method)
           expect(obj.existing_method).to eq(:existing_method_return_value)
+        end
+
+        it "does not remove any stubs on the local instance" do
+          klass.any_instance.stub(:existing_method).and_return(:any_instance_value)
+          obj = klass.new
+          obj.stub(:existing_method).and_return(:local_method)
+          klass.any_instance.unstub(:existing_method)
+          expect(obj.existing_method).to eq(:local_method)
         end
 
         it "does not remove any expectations with the same method name" do
