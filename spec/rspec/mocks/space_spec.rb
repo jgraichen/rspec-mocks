@@ -3,7 +3,7 @@ require 'spec_helper'
 module RSpec::Mocks
   describe Space do
 
-    describe "#proxied_instances_of(klass)" do
+    describe "#proxies_of_any_instance_recorder(klass)" do
       let(:space) { Space.new }
 
       before do
@@ -13,7 +13,7 @@ module RSpec::Mocks
       end
 
       it 'returns the proxies for objects of the same type as klass' do
-        expect(space.proxied_instances_of(String).size).to eq 2
+        expect(space.proxies_of(String).size).to eq 2
       end
     end
 

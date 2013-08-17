@@ -2,11 +2,12 @@ module RSpec
   module Mocks
     # @api private
     class Space
-      attr_reader :proxies, :any_instance_recorders
+      attr_reader :proxies, :any_instance_recorders, :proxies_by_klass
 
       def initialize
-        @proxies = {}
-        @any_instance_recorders = {}
+        @proxies                 = {}
+        @any_instance_recorders  = {}
+        @proxies_by_klass = Hash.new { |hash, key| hash[key] = [] }
       end
 
       def verify_all
@@ -28,6 +29,7 @@ module RSpec
 
         proxies.clear
         any_instance_recorders.clear
+        proxies_by_klass.clear
         expectation_ordering.clear
       end
 
@@ -46,23 +48,27 @@ module RSpec
         any_instance_recorders.delete(klass.__id__)
       end
 
+      def proxies_of(klass)
+        proxies_by_klass[klass].map { |id| proxies[id] }
+      end
+
       def proxy_for(object)
         id = id_for(object)
         proxies.fetch(id) do
           proxies[id] = case object
                         when NilClass   then ProxyForNil.new
                         when TestDouble then object.__build_mock_proxy
+                        when Class then
+                          proxies_by_klass[object] << id
+                          PartialMockProxy.new(object)
                         else
+                          proxies_by_klass[object.class] << id
                           PartialMockProxy.new(object)
                         end
         end
       end
 
       alias ensure_registered proxy_for
-
-      def proxied_instances_of(klass)
-        proxies.select { |_, proxy| proxy.object.is_a? klass }.map { |_, proxy| proxy }
-      end
 
       def registered?(object)
         proxies.has_key?(id_for object)

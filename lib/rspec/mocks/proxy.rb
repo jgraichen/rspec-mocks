@@ -14,7 +14,6 @@ module RSpec
         @already_proxied_respond_to = false
         @null_object = false
       end
-      attr_reader :object
 
       # @private
       def null_object?
