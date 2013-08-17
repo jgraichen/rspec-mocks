@@ -11,10 +11,11 @@ module RSpec
       # @see Chain
       class Recorder
         # @private
-        attr_reader :message_chains
+        attr_reader :message_chains, :stubs
 
         def initialize(klass)
           @message_chains = MessageChains.new
+          @stubs = Hash.new { |hash,key| hash[key] = [] }
           @observed_methods = []
           @played_methods = {}
           @klass = klass
