@@ -40,6 +40,7 @@ module RSpec
         @args_to_yield = []
         @failed_fast = nil
         @eval_context = nil
+        @within_time = nil
         @yield_receiver_to_implementation_block = false
 
         @implementation = Implementation.new
@@ -245,6 +246,13 @@ module RSpec
 
       # @private
       def verify_messages_received
+        if @within_time
+          time = Time.now + @within_time
+          while time > Time.now
+            break if expected_messages_received? and !negative?
+            sleep 0.1
+          end
+        end
         generate_error unless expected_messages_received? || failed_fast?
       rescue RSpec::Mocks::MockExpectationError => error
         error.backtrace.insert(0, @expected_from)
@@ -438,6 +446,15 @@ module RSpec
         self.inner_implementation_action = block
         @order_group.register(self)
         @ordered = true
+        self
+      end
+
+      def within(time)
+        @within_time = time.to_i
+        self
+      end
+
+      def seconds
         self
       end
 
